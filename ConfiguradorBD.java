@@ -3,10 +3,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class ConfiguradorBD {
     public static String bd;
@@ -19,7 +19,7 @@ public class ConfiguradorBD {
 
     public static void leerArchivoConfiguracion() {
         try {
-            Object parse = new JSONParser().parse(new FileReader("configuracionBD.json"));
+            Object parse = new JSONParser().parse(new FileReader("configuracion/configuracionBD.json"));
             JSONArray arrayBD = (JSONArray) parse;
 
 
@@ -50,14 +50,29 @@ public class ConfiguradorBD {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         ConfiguradorBD nuevaconfig = new ConfiguradorBD();
+        CreadorConexionBD nuevaBD = new CreadorConexionBD();
+        ConexionBD.read("SELECT * FROM Articulos");
+
+        pedir();
         VistaVotos vista = new VistaVotos();
-        FileWatcherService nuevow = new FileWatcherService();
+        PoolObserver nuevow = new PoolObserver();
 
 
 
 
+    }
+
+    public static void pedir() throws SQLException {
+        ConexionBD.update("update Articulos set DescArt='HOLAMUNdito' where ClvArt='A00001'");
+        ConexionBD.read("SELECT * FROM Articulos");
+        while(ConexionBD.resultSet.next()){
+            System.out.println(ConexionBD.resultSet.getString("ClvArt") + "|" + ConexionBD.resultSet.getString("DescArt") + "|" + ConexionBD.resultSet.getString("TipoArt"));
+        }
+        ConexionBD.connection.close();
+        ConexionBD.statement.close();
+        ConexionBD.resultSet.close();
     }
 
 }
